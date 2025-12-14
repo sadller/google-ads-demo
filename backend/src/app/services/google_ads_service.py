@@ -29,11 +29,21 @@ class GoogleAdsService:
         response.raise_for_status()
         image_data = response.content
         
+        content_type = response.headers.get('Content-Type', '').lower()
+        
         asset_operation = client.get_type("AssetOperation")
         asset = asset_operation.create
         asset.name = asset_name[:255]
         asset.type_ = client.enums.AssetTypeEnum.IMAGE
         asset.image_asset.data = image_data
+        asset.image_asset.file_size = len(image_data)
+        
+        if 'png' in content_type:
+            asset.image_asset.mime_type = client.enums.MimeTypeEnum.IMAGE_PNG
+        elif 'gif' in content_type:
+            asset.image_asset.mime_type = client.enums.MimeTypeEnum.IMAGE_GIF
+        else:
+            asset.image_asset.mime_type = client.enums.MimeTypeEnum.IMAGE_JPEG
         
         asset_response = asset_service.mutate_assets(
             customer_id=customer_id,
