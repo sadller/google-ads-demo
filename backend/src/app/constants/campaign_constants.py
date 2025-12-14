@@ -3,12 +3,13 @@
 # Campaign Status
 class CampaignStatus:
     DRAFT = 'DRAFT'
-    PUBLISHED = 'PUBLISHED'
-    PAUSED = 'PAUSED'
+    PUBLISHED = 'PUBLISHED'  # Published to Google Ads but paused
+    ENABLED = 'ENABLED'      # Active in Google Ads (billing active)
+    PAUSED = 'PAUSED'        # Paused in Google Ads
     
     @classmethod
     def all(cls):
-        return [cls.DRAFT, cls.PUBLISHED, cls.PAUSED]
+        return [cls.DRAFT, cls.PUBLISHED, cls.ENABLED, cls.PAUSED]
 
 
 # Campaign Objectives

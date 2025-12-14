@@ -30,5 +30,29 @@ export const campaignService = {
     });
     const result = await handleResponse(response);
     return result.campaign;
+  },
+
+  async publishCampaign(id: string): Promise<Campaign> {
+    const response = await fetch(`${API_BASE_URL}/campaigns/${id}/publish`, {
+      method: 'POST'
+    });
+    const result = await handleResponse(response);
+    return result.campaign;
+  },
+
+  async enableCampaign(id: string): Promise<Campaign> {
+    const response = await fetch(`${API_BASE_URL}/campaigns/${id}/enable`, {
+      method: 'PUT'
+    });
+    const result = await handleResponse(response);
+    return result.campaign;
+  },
+
+  async pauseCampaign(id: string): Promise<Campaign> {
+    const response = await fetch(`${API_BASE_URL}/campaigns/${id}/pause`, {
+      method: 'PUT'
+    });
+    const result = await handleResponse(response);
+    return result.campaign;
   }
 };

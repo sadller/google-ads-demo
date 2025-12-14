@@ -17,8 +17,11 @@ export const CAMPAIGN_TYPES = [
 
 export const CAMPAIGN_STATUS = {
   DRAFT: 'DRAFT',
-  PUBLISHED: 'PUBLISHED',
-  PAUSED: 'PAUSED'
+  PUBLISHED: 'PUBLISHED',  // Published to Google Ads but paused
+  ENABLED: 'ENABLED',      // Active in Google Ads (billing active)
+  PAUSED: 'PAUSED'         // Paused in Google Ads
 } as const;
+
+export type CampaignStatusType = typeof CAMPAIGN_STATUS[keyof typeof CAMPAIGN_STATUS];
 
 export const MINIMUM_BUDGET = 1000000; // $1 in micros

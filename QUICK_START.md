@@ -47,12 +47,29 @@ npm run dev
 
 Frontend will run on: **http://localhost:3000**
 
-## Step 3: Test the Application
+## Step 3: Configure Google Ads (Optional)
+
+```bash
+# Copy google-ads.yaml template
+cd backend
+cp google-ads.yaml.example google-ads.yaml
+
+# Edit google-ads.yaml with your credentials
+# Add your Customer ID to .env:
+# GOOGLE_ADS_CUSTOMER_ID=1234567890
+```
+
+**Note:** Skip this step for local testing. Publish/Pause will show error without Google Ads setup.
+
+## Step 4: Test the Application
 
 1. Open your browser to http://localhost:3000
-2. Fill out the campaign form
-3. Click "Save Campaign Locally"
-4. See your campaign appear in the list below
+2. Click "+ Create Campaign" button
+3. Fill out the campaign form
+4. Click "Create Campaign"
+5. See campaign appear in list with "Publish" button
+6. Click "Publish" to publish to Google Ads (requires Google Ads setup)
+7. After publishing, "Pause" button appears
 
 ## API Endpoints
 
@@ -61,8 +78,6 @@ Frontend will run on: **http://localhost:3000**
 - `GET /api/v1/campaigns` - Get all campaigns
 - `GET /api/v1/campaigns?status=DRAFT` - Filter by status
 - `GET /api/v1/campaigns/:id` - Get single campaign
-
-### 🚧 To Be Implemented
 - `POST /api/v1/campaigns/:id/publish` - Publish to Google Ads
 - `POST /api/v1/campaigns/:id/pause` - Pause campaign
 
@@ -152,14 +167,14 @@ curl -X POST http://localhost:8000/api/v1/campaigns \
 └─────────────────┘
 ```
 
-## Next Steps
+## Workflow
 
 1. ✅ Create campaigns via UI
 2. ✅ View campaigns in list
-3. ✅ Filter by status
-4. 🚧 Implement Google Ads publishing
-5. 🚧 Add campaign editing
-6. 🚧 Add authentication
+3. ✅ Filter by status (client-side)
+4. ✅ Publish campaigns to Google Ads
+5. ✅ Pause published campaigns
+6. ✅ Real-time status updates
 
 ## Documentation
 

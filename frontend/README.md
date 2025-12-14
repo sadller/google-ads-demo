@@ -69,11 +69,13 @@ frontend/src/
 
 ### Campaign List
 - View all campaigns in a table
-- Filter by status (DRAFT, PUBLISHED, PAUSED)
-- Display campaign details
-- Budget conversion
+- Filter by status (DRAFT, PUBLISHED, PAUSED) - client-side
+- Display campaign details with budget conversion
 - Status badges with color coding
-- Publish/Pause buttons (disabled - to be implemented)
+- **Publish button** for DRAFT campaigns - publishes to Google Ads
+- **Pause button** for PUBLISHED campaigns - pauses in Google Ads
+- Loading states during publish/pause actions
+- Real-time status updates
 
 ## API Integration
 
@@ -81,8 +83,9 @@ The app connects to the backend API at `http://localhost:8000/api/v1`
 
 ### Endpoints Used:
 - `GET /campaigns` - Fetch all campaigns
-- `GET /campaigns?status=DRAFT` - Filter campaigns by status
 - `POST /campaigns` - Create new campaign
+- `POST /campaigns/:id/publish` - Publish campaign to Google Ads
+- `POST /campaigns/:id/pause` - Pause campaign in Google Ads
 
 ## Configuration
 
@@ -134,14 +137,22 @@ Ensure the backend is running on port 8000 before starting the frontend.
 ### Port Already in Use
 If port 5173 is taken, Vite will automatically use the next available port.
 
+## Features Implemented
+
+- ✅ Create campaigns with modal form
+- ✅ List all campaigns
+- ✅ Client-side status filtering
+- ✅ Publish to Google Ads
+- ✅ Pause campaigns
+- ✅ Snackbar notifications
+- ✅ Real-time updates
+- ✅ Loading states
+- ✅ Error handling
+
 ## Future Enhancements
 
-- [ ] Implement Publish to Google Ads
-- [ ] Implement Pause campaign
-- [ ] Add campaign edit functionality
-- [ ] Add campaign delete
-- [ ] State management (Zustand/Redux)
-- [ ] Form validation library (Yup/Zod)
-- [ ] Toast notifications
-- [ ] Loading skeletons
+- [ ] Campaign edit functionality
+- [ ] Campaign delete
 - [ ] Pagination for large lists
+- [ ] Campaign analytics
+- [ ] Bulk operations

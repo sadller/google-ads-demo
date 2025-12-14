@@ -6,12 +6,14 @@ import { CAMPAIGN_STATUS } from '../lib/constants';
 interface CampaignListProps {
   refresh: number;
   onError: (message: string) => void;
+  onSuccess: (message: string) => void;
 }
 
-export default function CampaignList({ refresh, onError }: CampaignListProps) {
+export default function CampaignList({ refresh, onError, onSuccess }: CampaignListProps) {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     loadCampaigns();
@@ -29,6 +31,32 @@ export default function CampaignList({ refresh, onError }: CampaignListProps) {
     }
   };
 
+  const handlePublish = async (campaignId: string) => {
+    try {
+      setActionLoading(campaignId);
+      const updatedCampaign = await campaignService.publishCampaign(campaignId);
+      setCampaigns(prev => prev.map(c => c.id === campaignId ? updatedCampaign : c));
+      onSuccess('Campaign published to Google Ads successfully!');
+    } catch (err) {
+      onError(err instanceof Error ? err.message : 'Failed to publish campaign');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handlePause = async (campaignId: string) => {
+    try {
+      setActionLoading(campaignId);
+      const updatedCampaign = await campaignService.pauseCampaign(campaignId);
+      setCampaigns(prev => prev.map(c => c.id === campaignId ? updatedCampaign : c));
+      onSuccess('Campaign paused successfully!');
+    } catch (err) {
+      onError(err instanceof Error ? err.message : 'Failed to pause campaign');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const filteredCampaigns = useMemo(() => 
     filter ? campaigns.filter(c => c.status === filter) : campaigns,
     [campaigns, filter]
@@ -37,14 +65,29 @@ export default function CampaignList({ refresh, onError }: CampaignListProps) {
   const statusCounts = useMemo(() => ({
     draft: campaigns.filter(c => c.status === CAMPAIGN_STATUS.DRAFT).length,
     published: campaigns.filter(c => c.status === CAMPAIGN_STATUS.PUBLISHED).length,
+    enabled: campaigns.filter(c => c.status === CAMPAIGN_STATUS.ENABLED).length,
     paused: campaigns.filter(c => c.status === CAMPAIGN_STATUS.PAUSED).length
   }), [campaigns]);
+
+  const handleEnable = async (campaignId: string) => {
+    try {
+      setActionLoading(campaignId);
+      const updatedCampaign = await campaignService.enableCampaign(campaignId);
+      setCampaigns(prev => prev.map(c => c.id === campaignId ? updatedCampaign : c));
+      onSuccess('Campaign enabled successfully! Billing is now active.');
+    } catch (err) {
+      onError(err instanceof Error ? err.message : 'Failed to enable campaign');
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     const colors = {
       DRAFT: '#6b7280',
-      PUBLISHED: '#10b981',
-      PAUSED: '#f59e0b'
+      PUBLISHED: '#3b82f6',  // Blue - published but paused
+      ENABLED: '#10b981',    // Green - active
+      PAUSED: '#f59e0b'      // Orange - paused
     };
     return (
       <span 
@@ -68,6 +111,7 @@ export default function CampaignList({ refresh, onError }: CampaignListProps) {
             <option value="">All ({campaigns.length})</option>
             <option value={CAMPAIGN_STATUS.DRAFT}>Draft ({statusCounts.draft})</option>
             <option value={CAMPAIGN_STATUS.PUBLISHED}>Published ({statusCounts.published})</option>
+            <option value={CAMPAIGN_STATUS.ENABLED}>Enabled ({statusCounts.enabled})</option>
             <option value={CAMPAIGN_STATUS.PAUSED}>Paused ({statusCounts.paused})</option>
           </select>
         </div>
@@ -116,13 +160,30 @@ export default function CampaignList({ refresh, onError }: CampaignListProps) {
                   </td>
                   <td>
                     {campaign.status === 'DRAFT' && (
-                      <button className="btn-small btn-success" disabled>
-                        Publish
+                      <button 
+                        className="btn-small btn-success" 
+                        onClick={() => handlePublish(campaign.id)}
+                        disabled={actionLoading === campaign.id}
+                      >
+                        {actionLoading === campaign.id ? 'Publishing...' : 'Publish'}
                       </button>
                     )}
-                    {campaign.status === 'PUBLISHED' && (
-                      <button className="btn-small btn-warning" disabled>
-                        Pause
+                    {(campaign.status === 'PUBLISHED' || campaign.status === 'PAUSED') && (
+                      <button 
+                        className="btn-small btn-primary"
+                        onClick={() => handleEnable(campaign.id)}
+                        disabled={actionLoading === campaign.id}
+                      >
+                        {actionLoading === campaign.id ? 'Enabling...' : 'Enable'}
+                      </button>
+                    )}
+                    {campaign.status === 'ENABLED' && (
+                      <button 
+                        className="btn-small btn-warning"
+                        onClick={() => handlePause(campaign.id)}
+                        disabled={actionLoading === campaign.id}
+                      >
+                        {actionLoading === campaign.id ? 'Pausing...' : 'Pause'}
                       </button>
                     )}
                   </td>

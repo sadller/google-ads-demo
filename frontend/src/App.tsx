@@ -35,7 +35,11 @@ function App() {
             </button>
           </div>
           
-          <CampaignList refresh={refreshKey} onError={(msg) => showSnackbar(msg, 'error')} />
+          <CampaignList 
+            refresh={refreshKey} 
+            onError={(msg) => showSnackbar(msg, 'error')}
+            onSuccess={(msg) => showSnackbar(msg, 'success')}
+          />
         </div>
       </main>
 

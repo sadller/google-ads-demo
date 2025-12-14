@@ -1,3 +1,5 @@
+import type { CampaignStatusType } from '../lib/constants';
+
 export interface Campaign {
   id: string;
   name: string;
@@ -6,7 +8,7 @@ export interface Campaign {
   daily_budget: number;
   start_date: string;
   end_date?: string;
-  status: 'DRAFT' | 'PUBLISHED' | 'PAUSED';
+  status: CampaignStatusType;
   ad_group_name: string;
   ad_headline: string;
   ad_description: string;

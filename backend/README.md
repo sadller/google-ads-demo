@@ -17,8 +17,8 @@ cd backend
 poetry install
 
 # Create environment file
-copy env.template .env  # Windows
-cp env.template .env    # macOS/Linux
+copy .env.example .env  # Windows
+cp .env.example .env    # macOS/Linux
 
 # Edit .env with your database credentials
 ```
@@ -76,6 +76,7 @@ DATABASE_URL=postgresql://postgres:password@localhost:5432/pathik_db
 SECRET_KEY=your-secret-key
 DEBUG=True
 GOOGLE_ADS_YAML_PATH=google-ads.yaml
+GOOGLE_ADS_CUSTOMER_ID=1234567890
 ```
 
 ## Google Ads API Setup
@@ -157,6 +158,41 @@ Create a new campaign with DRAFT status.
   "name": "Campaign Name",
   "status": "DRAFT",
   ...
+}
+```
+
+#### Publish Campaign
+**POST** `/api/v1/campaigns/<campaign_id>/publish`
+
+Publishes a DRAFT campaign to Google Ads.
+
+**Response (200):**
+```json
+{
+  "message": "Campaign published successfully",
+  "campaign": {
+    "id": "...",
+    "status": "PUBLISHED",
+    "google_campaign_id": "12345678",
+    ...
+  }
+}
+```
+
+#### Pause Campaign
+**POST** `/api/v1/campaigns/<campaign_id>/pause`
+
+Pauses a PUBLISHED campaign in Google Ads.
+
+**Response (200):**
+```json
+{
+  "message": "Campaign paused successfully",
+  "campaign": {
+    "id": "...",
+    "status": "PAUSED",
+    ...
+  }
 }
 ```
 
@@ -286,8 +322,6 @@ poetry run pytest
 - **POST /api/v1/campaigns** - Create campaign with DRAFT status
 - **GET /api/v1/campaigns** - List all campaigns with optional filtering
 - **GET /api/v1/campaigns/:id** - Get single campaign by ID
-
-### 🚧 To Be Implemented
 - **POST /api/v1/campaigns/:id/publish** - Publish campaign to Google Ads
 - **POST /api/v1/campaigns/:id/pause** - Pause Google Ads campaign
 
