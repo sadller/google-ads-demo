@@ -2,11 +2,13 @@
 assignment.txt
 Pathik - Assignment 1.pdf
 
-# Python
+# Python - Cache and compiled files
 __pycache__/
 **/__pycache__/
 *.py[cod]
 *$py.class
+*.pyc
+*.pyo
 *.so
 
 # OS files
@@ -25,3 +27,6 @@ Thumbs.db
 # Logs
 logs/
 *.log
+
+# Node modules
+node_modules/
