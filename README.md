@@ -30,6 +30,8 @@ pathik/
 └── README.md
 ```
 
+The backend follows a layered architecture (api, services, models, schema) to ensure clear separation of concerns.
+
 ## Environment Variables
 
 ### Backend (`backend/.env`)
