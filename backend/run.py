@@ -1,16 +1,8 @@
-"""
-Development Server
-"""
 import os
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent / 'src'))
+from app import create_app
 
 
 def main():
-    from app import create_app
-    
     app = create_app()
     host = os.getenv('HOST', '0.0.0.0')
     port = int(os.getenv('PORT', 8000))

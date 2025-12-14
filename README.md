@@ -14,7 +14,7 @@ Full-stack application for managing Google Ads campaigns with React frontend and
 ```
 pathik/
 ├── backend/           # Flask API
-│   └── src/app/
+│   └── app/
 │       ├── api/       # REST endpoints
 │       ├── core/      # Config & extensions
 │       ├── models/    # Database models
