@@ -6,9 +6,7 @@ logger = logging.getLogger('pathik')
 
 
 def setup_logger(app):
-    
-    # Create logs directory
-    log_dir = Path(app.root_path).parent.parent.parent / 'logs'
+    log_dir = Path(app.root_path).parent.parent / 'logs'
     log_dir.mkdir(exist_ok=True)
     
     # Configure logging

@@ -1,13 +1,14 @@
 import uuid
+import requests
 from google.ads.googleads.errors import GoogleAdsException
 from app.utils.google_ads_client import google_ads_client
 from app.models.campaign import Campaign
 
 
 class PublishResult:
-    """Result of publishing a campaign to Google Ads"""
     def __init__(self, campaign_id: str):
         self.campaign_id = campaign_id
+        self.asset_resource_name: str = None
         self.warnings: list[str] = []
     
     def add_warning(self, warning: str):
@@ -16,13 +17,40 @@ class PublishResult:
 
 class GoogleAdsService:
     @staticmethod
+    def create_image_asset(customer_id: str, asset_url: str, asset_name: str) -> str:
+        """
+        Create an image asset from URL in Google Ads.
+        Returns the asset resource name.
+        """
+        client = google_ads_client.client
+        asset_service = client.get_service("AssetService")
+        
+        response = requests.get(asset_url, timeout=30)
+        response.raise_for_status()
+        image_data = response.content
+        
+        asset_operation = client.get_type("AssetOperation")
+        asset = asset_operation.create
+        asset.name = asset_name[:255]
+        asset.type_ = client.enums.AssetTypeEnum.IMAGE
+        asset.image_asset.data = image_data
+        
+        asset_response = asset_service.mutate_assets(
+            customer_id=customer_id,
+            operations=[asset_operation]
+        )
+        
+        return asset_response.results[0].resource_name
+    
+    @staticmethod
     def publish_campaign(campaign: Campaign, customer_id: str) -> PublishResult:
         """
         Publish campaign to Google Ads. Creates:
-        1. Campaign Budget
-        2. Campaign
-        3. Ad Group
-        4. Responsive Search Ad
+        1. Image Asset (if asset_url provided)
+        2. Campaign Budget
+        3. Campaign
+        4. Ad Group
+        5. Responsive Search Ad
         
         Returns PublishResult with campaign_id and any warnings.
         """
@@ -32,6 +60,18 @@ class GoogleAdsService:
             campaign_budget_service = client.get_service("CampaignBudgetService")
             ad_group_service = client.get_service("AdGroupService")
             ad_group_ad_service = client.get_service("AdGroupAdService")
+            
+            asset_resource_name = None
+            asset_warning = None
+            
+            if campaign.asset_url:
+                try:
+                    asset_name = f"Asset {campaign.name} {uuid.uuid4()}"
+                    asset_resource_name = GoogleAdsService.create_image_asset(
+                        customer_id, campaign.asset_url, asset_name
+                    )
+                except Exception as asset_error:
+                    asset_warning = f"Asset creation failed: {str(asset_error)}"
             
             # ========== Step 1: Create Campaign Budget ==========
             budget_operation = client.get_type("CampaignBudgetOperation")
@@ -83,9 +123,13 @@ class GoogleAdsService:
             )
             campaign_resource_name = campaign_response.results[0].resource_name
             
-            # Campaign created successfully - extract ID now to ensure we can return it
             campaign_id = campaign_resource_name.split('/')[-1]
             result = PublishResult(campaign_id)
+            
+            if asset_resource_name:
+                result.asset_resource_name = asset_resource_name
+            elif asset_warning:
+                result.add_warning(asset_warning)
             
             # ========== Step 3: Create Ad Group (optional) ==========
             ad_group_resource_name = None
