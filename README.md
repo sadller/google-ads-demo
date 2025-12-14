@@ -252,6 +252,3 @@ CREATE TABLE campaigns (
 - Verify URLs are valid and accessible
 - Review Google Ads policy requirements
 
-## License
-
-MIT
