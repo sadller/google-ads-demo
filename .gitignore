@@ -1,0 +1,14 @@
+assignment.txt
+Pathik - Assignment 1.pdf
+logs/*
+
+.env
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.DS_Store
+.idea/
+.vscode/
+backend/google-ads.yaml
