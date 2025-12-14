@@ -44,14 +44,14 @@ export default function CampaignList({ refresh, onError, onSuccess }: CampaignLi
     }
   };
 
-  const handlePause = async (campaignId: string) => {
+  const handleDisable = async (campaignId: string) => {
     try {
       setActionLoading(campaignId);
       const updatedCampaign = await campaignService.pauseCampaign(campaignId);
       setCampaigns(prev => prev.map(c => c.id === campaignId ? updatedCampaign : c));
-      onSuccess('Campaign paused successfully!');
+      onSuccess('Campaign disabled successfully!');
     } catch (err) {
-      onError(err instanceof Error ? err.message : 'Failed to pause campaign');
+      onError(err instanceof Error ? err.message : 'Failed to disable campaign');
     } finally {
       setActionLoading(null);
     }
@@ -66,7 +66,7 @@ export default function CampaignList({ refresh, onError, onSuccess }: CampaignLi
     draft: campaigns.filter(c => c.status === CAMPAIGN_STATUS.DRAFT).length,
     published: campaigns.filter(c => c.status === CAMPAIGN_STATUS.PUBLISHED).length,
     enabled: campaigns.filter(c => c.status === CAMPAIGN_STATUS.ENABLED).length,
-    paused: campaigns.filter(c => c.status === CAMPAIGN_STATUS.PAUSED).length
+    disabled: campaigns.filter(c => c.status === CAMPAIGN_STATUS.PAUSED).length
   }), [campaigns]);
 
   const handleEnable = async (campaignId: string) => {
@@ -82,19 +82,22 @@ export default function CampaignList({ refresh, onError, onSuccess }: CampaignLi
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const colors = {
+  const getStatusText = (status: string) => {
+    const colors: Record<string, string> = {
       DRAFT: '#6b7280',
-      PUBLISHED: '#3b82f6',  // Blue - published but paused
-      ENABLED: '#10b981',    // Green - active
-      PAUSED: '#f59e0b'      // Orange - paused
+      PUBLISHED: '#3b82f6',
+      ENABLED: '#10b981',
+      PAUSED: '#dc2626'
+    };
+    const labels: Record<string, string> = {
+      DRAFT: 'Draft',
+      PUBLISHED: 'Published',
+      ENABLED: 'Enabled',
+      PAUSED: 'Disabled'
     };
     return (
-      <span 
-        className="status-badge" 
-        style={{ backgroundColor: colors[status as keyof typeof colors] }}
-      >
-        {status}
+      <span style={{ color: colors[status], fontWeight: 600 }}>
+        {labels[status] || status}
       </span>
     );
   };
@@ -112,7 +115,7 @@ export default function CampaignList({ refresh, onError, onSuccess }: CampaignLi
             <option value={CAMPAIGN_STATUS.DRAFT}>Draft ({statusCounts.draft})</option>
             <option value={CAMPAIGN_STATUS.PUBLISHED}>Published ({statusCounts.published})</option>
             <option value={CAMPAIGN_STATUS.ENABLED}>Enabled ({statusCounts.enabled})</option>
-            <option value={CAMPAIGN_STATUS.PAUSED}>Paused ({statusCounts.paused})</option>
+            <option value={CAMPAIGN_STATUS.PAUSED}>Disabled ({statusCounts.disabled})</option>
           </select>
         </div>
       </div>
@@ -131,28 +134,16 @@ export default function CampaignList({ refresh, onError, onSuccess }: CampaignLi
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Type</th>
-                <th>Objective</th>
-                <th>Budget</th>
-                <th>Start Date</th>
                 <th>Status</th>
-                <th>Google ID</th>
+                <th>Google Campaign ID</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredCampaigns.map((campaign) => (
                 <tr key={campaign.id}>
-                  <td>
-                    <strong>{campaign.name}</strong>
-                    <br />
-                    <small>{campaign.ad_headline}</small>
-                  </td>
-                  <td>{campaign.campaign_type}</td>
-                  <td>{campaign.objective}</td>
-                  <td>${(campaign.daily_budget / 1000000).toFixed(2)}/day</td>
-                  <td>{new Date(campaign.start_date).toLocaleDateString()}</td>
-                  <td>{getStatusBadge(campaign.status)}</td>
+                  <td>{campaign.name}</td>
+                  <td>{getStatusText(campaign.status)}</td>
                   <td>
                     {campaign.google_campaign_id || (
                       <span className="text-muted">-</span>
@@ -179,11 +170,11 @@ export default function CampaignList({ refresh, onError, onSuccess }: CampaignLi
                     )}
                     {campaign.status === 'ENABLED' && (
                       <button 
-                        className="btn-small btn-warning"
-                        onClick={() => handlePause(campaign.id)}
+                        className="btn-small btn-danger"
+                        onClick={() => handleDisable(campaign.id)}
                         disabled={actionLoading === campaign.id}
                       >
-                        {actionLoading === campaign.id ? 'Pausing...' : 'Pause'}
+                        {actionLoading === campaign.id ? 'Disabling...' : 'Disable'}
                       </button>
                     )}
                   </td>
