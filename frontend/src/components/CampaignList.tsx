@@ -14,10 +14,11 @@ export default function CampaignList({ refresh, onError, onSuccess, onWarning }:
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     loadCampaigns();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh]);
 
   const loadCampaigns = async () => {
@@ -34,12 +35,11 @@ export default function CampaignList({ refresh, onError, onSuccess, onWarning }:
 
   const handlePublish = async (campaignId: string) => {
     try {
-      setActionLoading(campaignId);
+      setActionLoading(prev => ({ ...prev, [campaignId]: true }));
       const { campaign: updatedCampaign, warnings } = await campaignService.publishCampaign(campaignId);
       setCampaigns(prev => prev.map(c => c.id === campaignId ? updatedCampaign : c));
       
       if (warnings && warnings.length > 0) {
-        // Partial success - campaign published but with warnings
         onWarning(`Campaign published with warnings: ${warnings.join('; ')}`);
       } else {
         onSuccess('Campaign published to Google Ads successfully!');
@@ -47,20 +47,20 @@ export default function CampaignList({ refresh, onError, onSuccess, onWarning }:
     } catch (err) {
       onError(err instanceof Error ? err.message : 'Failed to publish campaign');
     } finally {
-      setActionLoading(null);
+      setActionLoading(prev => ({ ...prev, [campaignId]: false }));
     }
   };
 
   const handleDisable = async (campaignId: string) => {
     try {
-      setActionLoading(campaignId);
+      setActionLoading(prev => ({ ...prev, [campaignId]: true }));
       const updatedCampaign = await campaignService.pauseCampaign(campaignId);
       setCampaigns(prev => prev.map(c => c.id === campaignId ? updatedCampaign : c));
       onSuccess('Campaign disabled successfully!');
     } catch (err) {
       onError(err instanceof Error ? err.message : 'Failed to disable campaign');
     } finally {
-      setActionLoading(null);
+      setActionLoading(prev => ({ ...prev, [campaignId]: false }));
     }
   };
 
@@ -78,14 +78,14 @@ export default function CampaignList({ refresh, onError, onSuccess, onWarning }:
 
   const handleEnable = async (campaignId: string) => {
     try {
-      setActionLoading(campaignId);
+      setActionLoading(prev => ({ ...prev, [campaignId]: true }));
       const updatedCampaign = await campaignService.enableCampaign(campaignId);
       setCampaigns(prev => prev.map(c => c.id === campaignId ? updatedCampaign : c));
       onSuccess('Campaign enabled successfully! Billing is now active.');
     } catch (err) {
       onError(err instanceof Error ? err.message : 'Failed to enable campaign');
     } finally {
-      setActionLoading(null);
+      setActionLoading(prev => ({ ...prev, [campaignId]: false }));
     }
   };
 
@@ -109,7 +109,14 @@ export default function CampaignList({ refresh, onError, onSuccess, onWarning }:
     );
   };
 
-  if (loading) return <div className="loading">Loading campaigns...</div>;
+  if (loading) {
+    return (
+      <div className="loading">
+        <div className="spinner"></div>
+        <span>Loading campaigns...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="campaign-list">
@@ -161,27 +168,27 @@ export default function CampaignList({ refresh, onError, onSuccess, onWarning }:
                       <button 
                         className="btn-small btn-success" 
                         onClick={() => handlePublish(campaign.id)}
-                        disabled={actionLoading === campaign.id}
+                        disabled={actionLoading[campaign.id]}
                       >
-                        {actionLoading === campaign.id ? 'Publishing...' : 'Publish'}
+                        {actionLoading[campaign.id] ? 'Publishing...' : 'Publish'}
                       </button>
                     )}
                     {(campaign.status === 'PUBLISHED' || campaign.status === 'PAUSED') && (
                       <button 
                         className="btn-small btn-primary"
                         onClick={() => handleEnable(campaign.id)}
-                        disabled={actionLoading === campaign.id}
+                        disabled={actionLoading[campaign.id]}
                       >
-                        {actionLoading === campaign.id ? 'Enabling...' : 'Enable'}
+                        {actionLoading[campaign.id] ? 'Enabling...' : 'Enable'}
                       </button>
                     )}
                     {campaign.status === 'ENABLED' && (
                       <button 
                         className="btn-small btn-danger"
                         onClick={() => handleDisable(campaign.id)}
-                        disabled={actionLoading === campaign.id}
+                        disabled={actionLoading[campaign.id]}
                       >
-                        {actionLoading === campaign.id ? 'Disabling...' : 'Disable'}
+                        {actionLoading[campaign.id] ? 'Disabling...' : 'Disable'}
                       </button>
                     )}
                   </td>
