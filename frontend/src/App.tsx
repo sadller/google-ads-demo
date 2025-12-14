@@ -39,6 +39,7 @@ function App() {
             refresh={refreshKey} 
             onError={(msg) => showSnackbar(msg, 'error')}
             onSuccess={(msg) => showSnackbar(msg, 'success')}
+            onWarning={(msg) => showSnackbar(msg, 'warning')}
           />
         </div>
       </main>

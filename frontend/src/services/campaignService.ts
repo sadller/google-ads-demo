@@ -32,12 +32,12 @@ export const campaignService = {
     return result.campaign;
   },
 
-  async publishCampaign(id: string): Promise<Campaign> {
+  async publishCampaign(id: string): Promise<{ campaign: Campaign; warnings?: string[] }> {
     const response = await fetch(`${API_BASE_URL}/campaigns/${id}/publish`, {
       method: 'POST'
     });
     const result = await handleResponse(response);
-    return result.campaign;
+    return { campaign: result.campaign, warnings: result.warnings };
   },
 
   async enableCampaign(id: string): Promise<Campaign> {

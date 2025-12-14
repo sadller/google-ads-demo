@@ -65,12 +65,18 @@ def publish_campaign(campaign_id):
         if not customer_id:
             return jsonify({'error': 'Google Ads customer ID not configured'}), 500
         
-        campaign = CampaignService.publish_campaign(str(campaign_id), customer_id)
+        campaign, warnings = CampaignService.publish_campaign(str(campaign_id), customer_id)
         
-        return jsonify({
+        response = {
             'message': 'Campaign published successfully',
             'campaign': campaign_schema.dump(campaign)
-        }), 200
+        }
+        
+        # Include warnings if there are any (partial publish)
+        if warnings:
+            response['warnings'] = warnings
+        
+        return jsonify(response), 200
         
     except ValueError as e:
         return jsonify({'error': str(e)}), 400

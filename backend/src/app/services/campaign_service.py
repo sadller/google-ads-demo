@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from app.core.extensions import db
 from app.models.campaign import Campaign
 from app.schemas.campaign_schema import campaign_schema
@@ -31,8 +31,8 @@ class CampaignService:
         return Campaign.query.get(campaign_id)
     
     @staticmethod
-    def publish_campaign(campaign_id: str, customer_id: str) -> Campaign:
-        """Publish campaign to Google Ads"""
+    def publish_campaign(campaign_id: str, customer_id: str) -> Tuple[Campaign, List[str]]:
+        """Publish campaign to Google Ads. Returns (campaign, warnings)"""
         campaign = Campaign.query.get(campaign_id)
         if not campaign:
             raise ValueError('Campaign not found')
@@ -41,14 +41,14 @@ class CampaignService:
             raise ValueError('Campaign already published')
         
         # Publish to Google Ads
-        google_campaign_id = GoogleAdsService.publish_campaign(campaign, customer_id)
+        result = GoogleAdsService.publish_campaign(campaign, customer_id)
         
         # Update local database
-        campaign.google_campaign_id = google_campaign_id
+        campaign.google_campaign_id = result.campaign_id
         campaign.status = CampaignStatus.PUBLISHED
         db.session.commit()
         
-        return campaign
+        return campaign, result.warnings
     
     @staticmethod
     def enable_campaign(campaign_id: str, customer_id: str) -> Campaign:

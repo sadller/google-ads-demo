@@ -7,9 +7,10 @@ interface CampaignListProps {
   refresh: number;
   onError: (message: string) => void;
   onSuccess: (message: string) => void;
+  onWarning: (message: string) => void;
 }
 
-export default function CampaignList({ refresh, onError, onSuccess }: CampaignListProps) {
+export default function CampaignList({ refresh, onError, onSuccess, onWarning }: CampaignListProps) {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
@@ -34,9 +35,15 @@ export default function CampaignList({ refresh, onError, onSuccess }: CampaignLi
   const handlePublish = async (campaignId: string) => {
     try {
       setActionLoading(campaignId);
-      const updatedCampaign = await campaignService.publishCampaign(campaignId);
+      const { campaign: updatedCampaign, warnings } = await campaignService.publishCampaign(campaignId);
       setCampaigns(prev => prev.map(c => c.id === campaignId ? updatedCampaign : c));
-      onSuccess('Campaign published to Google Ads successfully!');
+      
+      if (warnings && warnings.length > 0) {
+        // Partial success - campaign published but with warnings
+        onWarning(`Campaign published with warnings: ${warnings.join('; ')}`);
+      } else {
+        onSuccess('Campaign published to Google Ads successfully!');
+      }
     } catch (err) {
       onError(err instanceof Error ? err.message : 'Failed to publish campaign');
     } finally {
