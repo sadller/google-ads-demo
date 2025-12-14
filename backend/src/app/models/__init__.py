@@ -1,4 +1,3 @@
-"""
-Database Models Module
-"""
-# Models will be added here as needed
+from app.models.campaign import Campaign
+
+__all__ = ['Campaign']

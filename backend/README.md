@@ -25,15 +25,38 @@ cp env.template .env    # macOS/Linux
 
 ## Database Setup
 
+### Using Supabase (Recommended)
+
+1. Create a project at [supabase.com](https://supabase.com)
+2. Get your connection string from Settings > Database > Connection pooling
+3. Update `.env` with your Supabase connection string:
+   ```
+   DATABASE_URL=postgresql://postgres.xxxxx:[PASSWORD]@aws-0-region.pooler.supabase.com:6543/postgres
+   ```
+4. Create tables using Flask-Migrate:
+   ```bash
+   flask db init
+   flask db migrate -m "Initial schema"
+   flask db upgrade
+   ```
+
+### Using Local PostgreSQL
+
 ```bash
 # Create database
 psql -U postgres -c "CREATE DATABASE pathik_db;"
 
-# Create tables
-poetry run flask shell
->>> from app.core import db
->>> db.create_all()
->>> exit()
+# Run migrations
+flask db init
+flask db migrate -m "Initial schema"
+flask db upgrade
+```
+
+### Alternative: Direct table creation
+
+```bash
+# If you don't want to use migrations
+python -m src.app.db_init
 ```
 
 ## Running the Application
@@ -97,30 +120,51 @@ backend/
 
 ## Database Migrations
 
+Flask-Migrate tracks database schema changes automatically.
+
 ```bash
-# Initialize migrations (first time)
-poetry run flask db init
+# Step 1: Initialize migrations (only once)
+flask db init
 
-# Create migration after model changes
-poetry run flask db migrate -m "description"
+# Step 2: After adding/modifying models, create migration
+flask db migrate -m "description of changes"
 
-# Apply migrations
-poetry run flask db upgrade
+# Step 3: Apply migration to database
+flask db upgrade
 ```
+
+**Example: Adding a new column**
+
+1. Edit `app/models/campaign.py` to add a new column
+2. Run `flask db migrate -m "Add new column"`
+3. Run `flask db upgrade`
+
+**Rollback migration:** `flask db downgrade`
 
 ## Development
 
-### Adding a Model
+### Database Schema
 
-```python
-# app/models/campaign.py
-from app.core import db
+Single table `campaigns` with all fields:
 
-class Campaign(db.Model):
-    __tablename__ = 'campaigns'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255), nullable=False)
-```
+| Field | Type | Description |
+|-------|------|-------------|
+| id | UUID | Primary key |
+| name | VARCHAR | Campaign name |
+| objective | VARCHAR | Campaign objective |
+| campaign_type | VARCHAR | Type of campaign |
+| daily_budget | INTEGER | Budget in micros (1M = $1) |
+| start_date | DATE | Start date |
+| end_date | DATE | End date (optional) |
+| status | VARCHAR | DRAFT/PUBLISHED/PAUSED |
+| ad_group_name | VARCHAR | Ad group name |
+| ad_headline | VARCHAR | Ad headline |
+| ad_description | TEXT | Ad description |
+| final_url | VARCHAR | Landing page URL |
+| asset_url | VARCHAR | Image/video URL (optional) |
+| google_campaign_id | VARCHAR | Google Ads ID |
+| created_at | TIMESTAMP | Created timestamp |
+| updated_at | TIMESTAMP | Updated timestamp |
 
 ### Adding an Endpoint
 

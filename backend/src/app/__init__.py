@@ -17,6 +17,9 @@ def create_app():
     init_app(app)
     register_error_handlers(app)
     
+    # Import models for Flask-Migrate
+    from app import models
+    
     # Register blueprints
     from app.api import api_v1_bp
     app.register_blueprint(api_v1_bp)
