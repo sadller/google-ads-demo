@@ -1,12 +1,11 @@
-"""
-Logging Configuration
-"""
 import logging
 from pathlib import Path
 
+# Create application logger
+logger = logging.getLogger('pathik')
+
 
 def setup_logger(app):
-    """Setup application logging"""
     
     # Create logs directory
     log_dir = Path(app.root_path).parent.parent.parent / 'logs'
@@ -21,5 +20,8 @@ def setup_logger(app):
             logging.StreamHandler()
         ]
     )
+    
+    # Set logger level
+    logger.setLevel(logging.DEBUG if app.debug else logging.INFO)
     
     app.logger.info('Application starting...')

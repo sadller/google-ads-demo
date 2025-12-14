@@ -2,6 +2,13 @@
 assignment.txt
 Pathik - Assignment 1.pdf
 
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
 # OS files
 .DS_Store
 Thumbs.db

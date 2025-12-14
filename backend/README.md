@@ -96,27 +96,109 @@ GOOGLE_ADS_YAML_PATH=google-ads.yaml
 
 ## API Endpoints
 
+### General
 - `GET /` - API information
 - `GET /health` - Health check
 - `GET /api/v1/health` - Health check with database status
 
+### Campaigns
+
+#### Create Campaign
+**POST** `/api/v1/campaigns`
+
+Create a new campaign with DRAFT status.
+
+**Request:**
+```json
+{
+  "name": "Summer Sale Campaign",
+  "objective": "Sales",
+  "campaign_type": "Demand Gen",
+  "daily_budget": 5000000,
+  "start_date": "2025-12-20",
+  "end_date": "2025-12-31",
+  "ad_group_name": "Main Ad Group",
+  "ad_headline": "Get 50% Off",
+  "ad_description": "Limited time offer",
+  "final_url": "https://example.com/sale",
+  "asset_url": "https://example.com/image.jpg"
+}
+```
+
+**Response (201):**
+```json
+{
+  "message": "Campaign created successfully",
+  "campaign": { "id": "...", "status": "DRAFT", ... }
+}
+```
+
+#### Get All Campaigns
+**GET** `/api/v1/campaigns`
+
+**Query Parameters:**
+- `status` (optional): Filter by status (DRAFT, PUBLISHED, PAUSED)
+
+**Response (200):**
+```json
+{
+  "campaigns": [ {...}, {...} ],
+  "count": 2
+}
+```
+
+#### Get Single Campaign
+**GET** `/api/v1/campaigns/<campaign_id>`
+
+**Response (200):**
+```json
+{
+  "id": "...",
+  "name": "Campaign Name",
+  "status": "DRAFT",
+  ...
+}
+```
+
 ## Project Structure
 
+This project follows a **Layered Architecture** pattern. See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed documentation.
+
 ```
-backend/
-├── run.py                      # Start server
-├── src/app/
-│   ├── __init__.py            # Application factory
-│   ├── core/
-│   │   ├── config.py          # Configuration
-│   │   └── extensions.py      # Flask extensions (db, migrate, etc.)
-│   ├── api/v1/endpoints/      # API endpoints
-│   ├── models/                # Database models
-│   ├── schemas/               # Validation schemas
-│   ├── services/              # Business logic
-│   └── utils/                 # Utilities
-└── tests/                     # Tests
+backend/src/app/
+├── api/                       # API Layer (Controllers)
+│   └── v1/endpoints/
+│       ├── campaigns.py       # Campaign endpoints
+│       └── health.py          # Health check
+│
+├── services/                  # Service Layer (Business Logic)
+│   └── campaign_service.py    # Campaign operations
+│
+├── models/                    # Data Layer (Database)
+│   └── campaign.py            # Campaign model
+│
+├── schemas/                   # Validation Layer
+│   └── campaign_schema.py     # Campaign schemas
+│
+├── constants/                 # Constants
+│   └── campaign_constants.py  # Status, types, etc.
+│
+├── core/                      # Core Configuration
+│   ├── config.py              # App config
+│   └── extensions.py          # Flask extensions
+│
+└── utils/                     # Utilities
+    ├── errors.py              # Error handlers
+    ├── logger.py              # Logging
+    └── google_ads_client.py   # Google Ads API
 ```
+
+### Architecture Layers
+
+1. **API Layer** - HTTP request/response handling
+2. **Service Layer** - Business logic and orchestration
+3. **Data Layer** - Database models and persistence
+4. **Schema Layer** - Data validation and serialization
 
 ## Database Migrations
 
@@ -200,11 +282,14 @@ poetry run pytest
 
 ## API Design
 
-The backend provides RESTful APIs for:
-- **POST /api/campaigns** - Create campaign (stores in PostgreSQL with status=DRAFT)
-- **GET /api/campaigns** - List all campaigns
-- **POST /api/campaigns/:id/publish** - Publish campaign to Google Ads
-- **POST /api/campaigns/:id/pause** - Pause Google Ads campaign
+### ✅ Implemented
+- **POST /api/v1/campaigns** - Create campaign with DRAFT status
+- **GET /api/v1/campaigns** - List all campaigns with optional filtering
+- **GET /api/v1/campaigns/:id** - Get single campaign by ID
+
+### 🚧 To Be Implemented
+- **POST /api/v1/campaigns/:id/publish** - Publish campaign to Google Ads
+- **POST /api/v1/campaigns/:id/pause** - Pause Google Ads campaign
 
 ## Contact
 
