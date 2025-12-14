@@ -1,6 +1,3 @@
-"""
-Error Handlers
-"""
 from flask import jsonify
 import logging
 
@@ -8,8 +5,6 @@ logger = logging.getLogger(__name__)
 
 
 def register_error_handlers(app):
-    """Register error handlers"""
-    
     @app.errorhandler(404)
     def not_found(error):
         return jsonify({'error': 'Resource not found'}), 404

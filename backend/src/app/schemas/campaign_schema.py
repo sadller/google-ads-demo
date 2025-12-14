@@ -26,21 +26,5 @@ class CampaignSchema(Schema):
             raise ValidationError("Start date cannot be in the past")
 
 
-class CampaignUpdateSchema(Schema):
-    name = fields.String(allow_none=True, validate=validate.Length(min=1, max=255))
-    objective = fields.String(allow_none=True)
-    campaign_type = fields.String(allow_none=True)
-    daily_budget = fields.Integer(allow_none=True, validate=validate.Range(min=1000000))
-    start_date = fields.Date(allow_none=True)
-    end_date = fields.Date(allow_none=True)
-    ad_group_name = fields.String(allow_none=True)
-    ad_headline = fields.String(allow_none=True)
-    ad_description = fields.String(allow_none=True)
-    final_url = fields.URL(allow_none=True)
-    asset_url = fields.URL(allow_none=True)
-
-
 campaign_schema = CampaignSchema()
-campaign_update_schema = CampaignUpdateSchema()
 campaigns_schema = CampaignSchema(many=True)
-

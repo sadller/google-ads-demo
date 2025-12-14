@@ -1,7 +1,7 @@
 from typing import List, Optional, Tuple
 from app.core.extensions import db
-from app.models.campaign import Campaign
-from app.schemas.campaign_schema import campaign_schema
+from app.models import Campaign
+from app.schemas import campaign_schema
 from app.constants import CampaignStatus
 from app.services.google_ads_service import GoogleAdsService
 
@@ -20,10 +20,8 @@ class CampaignService:
     @staticmethod
     def get_all_campaigns(status: Optional[str] = None) -> List[Campaign]:
         query = Campaign.query
-        
         if status:
             query = query.filter_by(status=status)
-        
         return query.order_by(Campaign.created_at.desc()).all()
     
     @staticmethod
@@ -32,7 +30,6 @@ class CampaignService:
     
     @staticmethod
     def publish_campaign(campaign_id: str, customer_id: str) -> Tuple[Campaign, List[str]]:
-        """Publish campaign to Google Ads. Returns (campaign, warnings)"""
         campaign = Campaign.query.get(campaign_id)
         if not campaign:
             raise ValueError('Campaign not found')
@@ -40,10 +37,8 @@ class CampaignService:
         if campaign.status == CampaignStatus.PUBLISHED:
             raise ValueError('Campaign already published')
         
-        # Publish to Google Ads
         result = GoogleAdsService.publish_campaign(campaign, customer_id)
         
-        # Update local database
         campaign.google_campaign_id = result.campaign_id
         campaign.status = CampaignStatus.PUBLISHED
         db.session.commit()
@@ -52,7 +47,6 @@ class CampaignService:
     
     @staticmethod
     def enable_campaign(campaign_id: str, customer_id: str) -> Campaign:
-        """Enable a Google Ads campaign (starts billing!)"""
         campaign = Campaign.query.get(campaign_id)
         if not campaign:
             raise ValueError('Campaign not found')
@@ -63,10 +57,8 @@ class CampaignService:
         if campaign.status == CampaignStatus.ENABLED:
             raise ValueError('Campaign already enabled')
         
-        # Enable in Google Ads
         GoogleAdsService.enable_campaign(campaign.google_campaign_id, customer_id)
         
-        # Update local database
         campaign.status = CampaignStatus.ENABLED
         db.session.commit()
         
@@ -74,7 +66,6 @@ class CampaignService:
     
     @staticmethod
     def pause_campaign(campaign_id: str, customer_id: str) -> Campaign:
-        """Pause a Google Ads campaign"""
         campaign = Campaign.query.get(campaign_id)
         if not campaign:
             raise ValueError('Campaign not found')
@@ -85,10 +76,8 @@ class CampaignService:
         if campaign.status == CampaignStatus.PAUSED:
             raise ValueError('Campaign already paused')
         
-        # Pause in Google Ads
         GoogleAdsService.pause_campaign(campaign.google_campaign_id, customer_id)
         
-        # Update local database
         campaign.status = CampaignStatus.PAUSED
         db.session.commit()
         

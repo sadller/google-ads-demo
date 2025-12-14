@@ -1,6 +1,3 @@
-"""
-Utility Modules
-"""
 from .errors import register_error_handlers
 from .logger import setup_logger
 

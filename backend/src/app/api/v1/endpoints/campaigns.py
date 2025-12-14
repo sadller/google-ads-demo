@@ -3,9 +3,8 @@ from marshmallow import ValidationError
 from app.api.v1 import api_v1_bp
 from app.core.extensions import db
 from app.core.config import Config
-from app.services.campaign_service import CampaignService
-from app.schemas.campaign_schema import campaign_schema, campaigns_schema
-import os
+from app.services import CampaignService
+from app.schemas import campaign_schema, campaigns_schema
 
 
 @api_v1_bp.route('/campaigns', methods=['POST'])
@@ -24,7 +23,6 @@ def create_campaign():
         
     except ValidationError as err:
         return jsonify({'error': 'Validation error', 'messages': err.messages}), 400
-        
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
@@ -40,7 +38,6 @@ def get_campaigns():
             'campaigns': campaigns_schema.dump(campaigns),
             'count': len(campaigns)
         }), 200
-        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -53,7 +50,6 @@ def get_campaign(campaign_id):
             return jsonify({'error': 'Campaign not found'}), 404
         
         return jsonify(campaign_schema.dump(campaign)), 200
-        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -61,7 +57,7 @@ def get_campaign(campaign_id):
 @api_v1_bp.route('/campaigns/<uuid:campaign_id>/publish', methods=['POST'])
 def publish_campaign(campaign_id):
     try:
-        customer_id = os.getenv('GOOGLE_ADS_CUSTOMER_ID')
+        customer_id = Config.GOOGLE_ADS_CUSTOMER_ID
         if not customer_id:
             return jsonify({'error': 'Google Ads customer ID not configured'}), 500
         
@@ -71,8 +67,6 @@ def publish_campaign(campaign_id):
             'message': 'Campaign published successfully',
             'campaign': campaign_schema.dump(campaign)
         }
-        
-        # Include warnings if there are any (partial publish)
         if warnings:
             response['warnings'] = warnings
         
@@ -80,7 +74,6 @@ def publish_campaign(campaign_id):
         
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
-        
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
@@ -89,7 +82,7 @@ def publish_campaign(campaign_id):
 @api_v1_bp.route('/campaigns/<uuid:campaign_id>/enable', methods=['PUT'])
 def enable_campaign(campaign_id):
     try:
-        customer_id = os.getenv('GOOGLE_ADS_CUSTOMER_ID')
+        customer_id = Config.GOOGLE_ADS_CUSTOMER_ID
         if not customer_id:
             return jsonify({'error': 'Google Ads customer ID not configured'}), 500
         
@@ -102,7 +95,6 @@ def enable_campaign(campaign_id):
         
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
-        
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
@@ -111,7 +103,7 @@ def enable_campaign(campaign_id):
 @api_v1_bp.route('/campaigns/<uuid:campaign_id>/pause', methods=['PUT'])
 def pause_campaign(campaign_id):
     try:
-        customer_id = os.getenv('GOOGLE_ADS_CUSTOMER_ID')
+        customer_id = Config.GOOGLE_ADS_CUSTOMER_ID
         if not customer_id:
             return jsonify({'error': 'Google Ads customer ID not configured'}), 500
         
@@ -124,7 +116,6 @@ def pause_campaign(campaign_id):
         
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
-        
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500

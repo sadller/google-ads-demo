@@ -13,7 +13,7 @@ interface CampaignModalProps {
 const INITIAL_FORM_DATA: CreateCampaignRequest = {
   name: '',
   objective: 'Sales',
-  campaign_type: 'Demand Gen',
+  campaign_type: 'Search',
   daily_budget: 5000000,
   start_date: '',
   end_date: '',
@@ -183,7 +183,7 @@ export default function CampaignModal({ isOpen, onClose, onSuccess, onError }: C
             </div>
 
             <div className="form-group">
-              <label>Asset URL (Image/Video)</label>
+              <label>Asset URL (Image)</label>
               <input
                 type="url"
                 value={formData.asset_url}

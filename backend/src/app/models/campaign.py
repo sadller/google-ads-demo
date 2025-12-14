@@ -26,23 +26,3 @@ class Campaign(db.Model):
     
     def __repr__(self):
         return f'<Campaign {self.name}>'
-    
-    def to_dict(self):
-        return {
-            'id': str(self.id),
-            'name': self.name,
-            'objective': self.objective,
-            'campaign_type': self.campaign_type,
-            'daily_budget': self.daily_budget,
-            'start_date': self.start_date.isoformat() if self.start_date else None,
-            'end_date': self.end_date.isoformat() if self.end_date else None,
-            'status': self.status,
-            'ad_group_name': self.ad_group_name,
-            'ad_headline': self.ad_headline,
-            'ad_description': self.ad_description,
-            'final_url': self.final_url,
-            'asset_url': self.asset_url,
-            'google_campaign_id': self.google_campaign_id,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
-        }

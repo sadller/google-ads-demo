@@ -1,7 +1,3 @@
-"""
-API Package
-Contains all API versions and routes
-"""
 from .v1 import api_v1_bp
 
 __all__ = ['api_v1_bp']
